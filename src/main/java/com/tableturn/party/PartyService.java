@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.tableturn.error.NoSuchParty;
 import com.tableturn.config.TableTurnSettings;
-import com.tableturn.error.NoSuchParty;
 import com.tableturn.error.PartyTooBig;
 import com.tableturn.table.BranchRepository;
 import com.tableturn.table.TableRepository;

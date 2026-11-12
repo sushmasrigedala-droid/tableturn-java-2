@@ -25,7 +25,7 @@ public class TableService {
     }
 /** Returns all tables in a branch. Optionally filters by section and state.*/
     public FloorView floor(String branch,Section section,TableState state){
-        List<TableView> shown = tables.all(branchId(branch)).stream()
+       List<TableView> shown = tables.findAll(branchId(branch)).stream()
                 .map(this::view)
                 .filter(t -> section == null || t.section() == section)
                 .filter(t -> state == null || t.state() == state)
@@ -40,19 +40,24 @@ public class TableService {
         .orElseThrow(() -> new NoSuchTable(branch, no));
         return view(row);
     }
+    
+    
+    
     /**
-     * Derived on every read: free when no seating is current, seated while one is, with the
-     * minutes the party has sat counted from the clock.
+     * Derived on every read: free when no seating is current; uncleared once its party has left; seated while the party
+     * is still there, with the minutes it has sat counted from the clock.
      */
     private TableView view(TableRepository.Row row) {
-              if (row.currentSeatingId() == null) {
-            return new TableView(
-                row.no(),row.seats(),row.section(),TableState.free,null, null);
+             if (row.seatingId() == null) {
+            return new TableView(row.table(),row.seats(),Section.valueOf(row.section()),TableState.free,null, null);
  }
+ if (row.leftAt() != null) {
+            return new TableView(row.table(), row.seats(), Section.valueOf(row.section()), TableState.uncleared, null, null);
+        }
  int seatedMinutes = (int) Duration.between(
         row.seatedAt(),clock.instant()).toMinutes();
         return new TableView(
-        row.no(),row.seats(),row.section(),TableState.seated,PartyIds.format(row.partyId()),seatedMinutes);
+        row.table(),row.seats(),Section.valueOf(row.section()),TableState.seated,PartyIds.format(row.partyId()),seatedMinutes);
     }
 private long branchId(String branch) {
                 return branches.idOf(branch)

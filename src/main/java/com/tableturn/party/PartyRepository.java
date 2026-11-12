@@ -53,10 +53,15 @@ public Optional<Row> find(long branchId, long id) {
                 .query(Row.class)
                 .optional();
     }
+ public void markSeated(long id) {
+        jdbc.sql("UPDATE parties SET state = 'seated' WHERE id = ?").param(id).update();
+                }
+    public void markLeft(long id) {
+        jdbc.sql("UPDATE parties SET state = 'left' WHERE id = ?") .param(id).update();
+    }
 
-                public void markSeated(long id) {
-        jdbc.sql("UPDATE parties SET state = 'seated' WHERE id = ?")
-                .param(id).update();
+    public void markCleared(long id) {
+        jdbc.sql("UPDATE parties SET state = 'cleared' WHERE id = ?").param(id).update();
     }
 
     /** The real wait, written once when the party is seated. */
