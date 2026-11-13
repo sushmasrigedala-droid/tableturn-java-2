@@ -1,18 +1,20 @@
 package com.tableturn.party;
 
-import java.net.URI;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
+import com.tableturn.error.ProblemExamples;
 
-/** The waitlist. There is one branch, Baner. Parses the request and delegates; no rules live here. */
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+/** One party. There is one branch, Baner. Parses the request and delegates; no rules live here. */
 @RestController
+@Tag(name = "parties", description = "One party and its timeline")
 public class PartyController{
 
     static final String BRANCH = "Baner";
@@ -23,13 +25,12 @@ public class PartyController{
       this.parties = parties;
     }
 
-    @PostMapping("/waitlist")
-    public ResponseEntity<JoinResponse> join(@Valid @RequestBody JoinRequest body) {
-        JoinResponse joined = parties.join(BRANCH, body.name(), body.covers(), body.phone());
-        return ResponseEntity.created(URI.create("/parties/" + joined.partyId())).body(joined);
-    }
-
     @GetMapping("/parties/{partyId}")
+        @Operation(summary = "One party: its quote, its real wait, its table and every event of its evening in order")
+    @ApiResponse(responseCode = "200", description = "The party")
+    @ApiResponse( responseCode = "404", description = "No such party on this list",
+            content = @Content(mediaType = ProblemExamples.PROBLEM,
+                    examples = @ExampleObject(name = "no-such-party", value = ProblemExamples.NO_SUCH_PARTY)))
     public PartyView party(@PathVariable String partyId) {
         return parties.party(BRANCH, partyId);
     }
