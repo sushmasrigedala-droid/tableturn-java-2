@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository;
 public class SeatingRepository {
 
 /** One seating, with the party and table it joins (their database ids, and the table's number). */
-    public record Row( long id,long partyId,long tableId,String table,Instant seatedAt,Instant leftAt,
-    Instant clearedAt) {
+        public record Row(long id, long branchId, long partyId, long tableId, String table, Instant seatedAt,
+                      Instant leftAt, Instant clearedAt) {
     }
 
     private final JdbcClient jdbc;
@@ -32,11 +32,12 @@ return key.getKeyAs(Long.class);
     }
 
     public Optional<Row> find(long branchId, long id) {
-        return jdbc.sql("""
-                        SELECT s.id, s.party_id, s.table_id, t.no AS "table", s.seated_at, s.left_at, s.cleared_at
+                return jdbc.sql("""
+                        SELECT s.id, s.branch_id, s.party_id, s.table_id, t.no AS "table", s.seated_at, s.left_at,
+                               s.cleared_at
                         FROM seatings s JOIN tables t ON t.id = s.table_id
-                       WHERE s.branch_id = ? AND s.id = ? """ )
-                .params(branchId, id) .query(Row.class).optional();
+                       WHERE s.branch_id = ? AND s.id = ? """)
+                .params(branchId, id).query(Row.class).optional();
     }
 
     public void leave(long id, Instant leftAt) {
